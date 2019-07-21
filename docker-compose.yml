@@ -1,0 +1,38 @@
+version: '3'
+services:
+  rmq_server:
+    image: rabbitmq
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    labels:
+      NAME: "rabbitmq-server"
+    healthcheck:
+      timeout: 5s
+      interval: 5s
+      retries: 5
+      test:
+        - "CMD"
+        - "rabbitmqctl"
+        - "status"
+
+  basic-send:
+    image: basic-send
+    build: ./basic_send
+    container_name: basic-rabbitmq-send-client
+    command: ["./BasicSend","-amqp","amqp://guest:guest@rmq_server:5672/"]
+    depends_on:
+      - rmq_server
+
+  basic-recieve:
+    image: basic-recieve
+    build: ./basic_recieve
+    container_name: basic-rabbitmq-recieve-client
+    command: ["./BasicRecieve","-amqp","amqp://guest:guest@rmq_server:5672/"]
+    depends_on:
+      - rmq_server
