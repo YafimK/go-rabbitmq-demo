@@ -21,18 +21,35 @@ services:
         - "rabbitmqctl"
         - "status"
 
-  basic-send:
-    image: basic-send
-    build: ./basic_send
-    container_name: basic-rabbitmq-send-client
-    command: ["./BasicSend","-amqp","amqp://guest:guest@rmq_server:5672/"]
+  #  basic-send:
+  #    image: basic-send
+  #    build: ./basic_send
+  #    container_name: basic-rabbitmq-send-client
+  #    command: ["./BasicSend","-amqp","amqp://guest:guest@rmq_server:5672/"]
+  #    depends_on:
+  #      - rmq_server
+  #
+  #  basic-recieve:
+  #    image: basic-recieve
+  #    build: ./basic_recieve
+  #    container_name: basic-rabbitmq-recieve-client
+  #    command: ["./BasicRecieve","-amqp","amqp://guest:guest@rmq_server:5672/"]
+  #    depends_on:
+  #      - rmq_server
+  #
+
+  tasker:
+    image: tasker
+    build: ./tasker
+    command: ["./Tasker","-amqp","amqp://guest:guest@rmq_server:5672/", "-host","http://tasker:8082"]
+    ports:
+      - "8082:8082"
     depends_on:
       - rmq_server
 
-  basic-recieve:
-    image: basic-recieve
-    build: ./basic_recieve
-    container_name: basic-rabbitmq-recieve-client
-    command: ["./BasicRecieve","-amqp","amqp://guest:guest@rmq_server:5672/"]
+  worker:
+    image: worker
+    build: ./worker
+    command: ["./Worker","-amqp","amqp://guest:guest@rmq_server:5672/"]
     depends_on:
       - rmq_server
